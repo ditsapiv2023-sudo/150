@@ -1,0 +1,18 @@
+# Compila el .exe en la nube de GitHub (sin instalar nada en tu PC).
+name: build-exe
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt pyinstaller
+      - run: pyinstaller --onefile --name ValidadorSSC --exclude-module matplotlib --exclude-module scipy --exclude-module IPython --exclude-module pytest validador.py
+      - run: |
+          mkdir release
+          copy dist\ValidadorSSC.exe release\
+          xcopy /E /I /Y catalogos release\catalogos
+      - uses: actions/upload-artifact@v4
+        with: { name: ValidadorSSC, path: release }
